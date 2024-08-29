@@ -1,10 +1,17 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
+import { createClient } from '@libsql/client';
+import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaClient } from '@prisma/client';
+const libsql = createClient({
+  url: `${process.env.TURSO_URL}`,
+  authToken: `${process.env.TURSO_TOKEN}`,
+});
+const adapter = new PrismaLibSQL(libsql);
+const prisma = new PrismaClient({ adapter });
 const router = Router();
-const prisma = new PrismaClient();
 
 /*
 //////--REFERENCIA DE formData--//////
@@ -17,6 +24,8 @@ confirPassword: String,
 */
 
 router.post('/login', async (req, res) => {
+  const cart = await prisma.cart.findMany();
+  console.log(cart);
   const formData = req.body;
   const passwordBcrypt = await bcrypt.hash(
     formData.password,
@@ -41,6 +50,7 @@ router.post('/login', async (req, res) => {
             correo: existingUser.correo,
             rol: existingUser.rol,
           };
+
           const token = jwt.sign(dataToken, process.env.SECRET_KEY, {
             expiresIn: '2h',
           });
@@ -112,8 +122,12 @@ router.post('/register', async (req, res) => {
       correo: createAccount.correo,
       rol: createAccount.rol,
     };
+
     const token = jwt.sign(dataToken, process.env.SECRET_KEY, {
       expiresIn: '2h',
+    });
+    const createCart = await prisma.cart.create({
+      data: { id_user: createAccount.id },
     });
     res
       .cookie('loggedToken', token, {

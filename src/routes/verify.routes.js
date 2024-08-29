@@ -1,10 +1,7 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import cookieParser from 'cookie-parser';
+
 const router = Router();
-const prisma = new PrismaClient();
 
 router.post('/logged', (req, res) => {
   const { loggedToken } = req.cookies;

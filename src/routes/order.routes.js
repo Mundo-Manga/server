@@ -1,11 +1,16 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
+import { createClient } from '@libsql/client';
+import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaClient } from '@prisma/client';
+const libsql = createClient({
+  url: `${process.env.TURSO_URL}`,
+  authToken: `${process.env.TURSO_TOKEN}`,
+});
+const adapter = new PrismaLibSQL(libsql);
+const prisma = new PrismaClient({ adapter });
 
 const router = Router();
-const prisma = new PrismaClient();
 
 router.get('/countOrder', async (req, res) => {
   try {

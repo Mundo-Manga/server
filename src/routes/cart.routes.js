@@ -1,11 +1,16 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
+import { createClient } from '@libsql/client';
+import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaClient } from '@prisma/client';
+const libsql = createClient({
+  url: `${process.env.TURSO_URL}`,
+  authToken: `${process.env.TURSO_TOKEN}`,
+});
+const adapter = new PrismaLibSQL(libsql);
+const prisma = new PrismaClient({ adapter });
 
 const router = Router();
-const prisma = new PrismaClient();
 
 router.delete('/detailsCartDelete', async (req, res) => {
   const codeDelete = req.query.id_detailCart;
@@ -41,7 +46,17 @@ router.post('/detailsCartAdd', async (req, res) => {
 
   try {
     const tokenData = jwt.verify(loggedToken, process.env.SECRET_KEY);
-
+    console.log(tokenData.id);
+    const cart = await prisma.cart.findMany();
+    console.log(cart);
+    const cartId = await prisma.cart.findUnique({
+      where: { id_user: tokenData.id },
+      select: { id: true },
+    });
+    const priceProduct = await prisma.product.findUnique({
+      where: { code_producto: code_producto },
+      select: { price: true },
+    });
     const newDetail = await prisma.detailsCart.create({
       data: {
         id_detallesCarrito: cartId.id,
@@ -52,6 +67,7 @@ router.post('/detailsCartAdd', async (req, res) => {
     });
     res.send(true);
   } catch (err) {
+    console.log(err);
     return res.status(404).send({ err });
   }
 });

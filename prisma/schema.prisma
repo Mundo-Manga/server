@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -58,11 +59,8 @@ model DetailsOrder{
   id Int @id @default(autoincrement())
   cantidad Int
   subtotal Int
-
-
   order Order @relation(fields: [id_order],references: [id])
   id_order Int
-  
   producto Product @relation(fields: [codeProducto],references: [code_producto])
   codeProducto String
 }
