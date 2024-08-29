@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+model User {
+    id Int @id @default(autoincrement())
+  nombre_usuario String @unique
+  correo String @unique
+  nombre String
+  apellido String
+  contrasena String
+  rol String @default("cliente")
+
+  carritos Cart?
+  order Order[]
+}
+
+model Cart{
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [id_user],references: [id])
+  id_user Int @unique
+  details DetailsCart[]
+}
+
+model DetailsCart{
+  id Int @id @default(autoincrement())
+  subtotal Int @default(1)
+  cant_producto Int
+
+
+  cart Cart @relation(fields: [id_detallesCarrito],references: [id])
+  id_detallesCarrito Int
+  
+  producto Product @relation(fields: [codeProducto],references: [code_producto])
+  codeProducto String
+
+}
+model Product{
+  id Int @id @default(autoincrement())
+  code_producto String @unique
+  nombre String
+  stock Int
+  price Int
+  description String?
+
+  cart DetailsCart[]
+  order DetailsOrder[]
+ 
+}
+model DetailsOrder{
+  id Int @id @default(autoincrement())
+  cantidad Int
+  subtotal Int
+
+
+  order Order @relation(fields: [id_order],references: [id])
+  id_order Int
+  
+  producto Product @relation(fields: [codeProducto],references: [code_producto])
+  codeProducto String
+}
+model Order{
+  id Int @id @default(autoincrement())
+  fecha DateTime @default(now())
+  estado String @default("pending")
+  monto_total Int
+
+  detailsOrder DetailsOrder[]
+
+  user User @relation(fields: [id_usuario],references: [id])
+  id_usuario Int
+}
+model Address{
+  id Int @id @default(autoincrement())
+  codigo_postal String
+  detalles String
+  departamento Int
+  piso Int
+  calle String
+  numero Int
+  provincia String
+  ciudad String
+}
