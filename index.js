@@ -13,12 +13,15 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(
-  cors({
-    origin: 'https://ecomerce-olimpiadas.web.app',
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: 'https://ecomerce-olimpiadas.web.app',
+  credentials: true, 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+  allowedHeaders: ['Content-Type', 'Authorization'], 
+};
+
+app.use(cors(corsOptions));
+
 
 app.use('/api/auth', authRoutes);
 app.use('/api/verify', verifyRoutes);
