@@ -15,7 +15,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: 'http://localhost:4200',
+    origin: 'https://ecomerce-olimpiadas.web.app',
     credentials: true,
   })
 );
